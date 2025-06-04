@@ -1,0 +1,229 @@
+# Sistema de Triagem Médica IoT - .gitignore
+
+# ========================================
+# Python
+# ========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ========================================
+# Virtual Environments
+# ========================================
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+.conda/
+conda-meta/
+
+# ========================================
+# Streamlit
+# ========================================
+.streamlit/
+*.streamlit/
+
+# ========================================
+# Jupyter Notebook
+# ========================================
+.ipynb_checkpoints
+
+# ========================================
+# IDEs e Editores
+# ========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.spyderproject
+.spyproject
+.ropeproject
+
+# ========================================
+# Sistema Operacional
+# ========================================
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+
+# ========================================
+# Logs e Debugging
+# ========================================
+*.log
+logs/
+*.out
+*.err
+
+# ========================================
+# Dados Sensíveis (IMPORTANTE!)
+# ========================================
+# Chaves de criptografia
+.encryption_key
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Arquivos de configuração com senhas
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+config.ini
+secrets.json
+
+# Dados de usuários (manter apenas estrutura)
+users.json
+sessions.json
+audit_log.json
+
+# ========================================
+# Dados IoT (manter apenas exemplos)
+# ========================================
+iot_readings.json
+iot_devices.json
+
+# ========================================
+# Histórico de Atendimentos
+# ========================================
+historico_atendimentos.json
+
+# ========================================
+# Machine Learning
+# ========================================
+*.pkl
+*.joblib
+*.h5
+*.hdf5
+models/
+checkpoints/
+
+# ========================================
+# Testing
+# ========================================
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# ========================================
+# Documentation
+# ========================================
+docs/_build/
+.readthedocs.yml
+
+# ========================================
+# AWS e Cloud
+# ========================================
+.aws/
+*.pem
+aws-credentials.json
+
+# ========================================
+# Docker
+# ========================================
+.dockerignore
+docker-compose.override.yml
+
+# ========================================
+# Backup e Temporários
+# ========================================
+*.bak
+*.backup
+*.tmp
+*.temp
+.tmp/
+backup/
+backups/
+
+# ========================================
+# Dados de Exemplo (manter apenas estrutura)
+# ========================================
+# Descomente se quiser ignorar dados de exemplo
+# exemplo_*.json
+# demo_*.json
+# test_*.json
+
+# ========================================
+# Certificados SSL
+# ========================================
+*.crt
+*.cert
+*.cer
+*.p7b
+*.p7r
+*.spc
+
+# ========================================
+# Arquivos de Sistema
+# ========================================
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ========================================
+# Arquivos Específicos do Projeto
+# ========================================
+# Dados reais de produção (manter apenas exemplos)
+# production_data/
+# real_patients/
+
+# Relatórios gerados
+relatorios_gerados/
+exports/
+
+# Cache de modelos
+model_cache/
+.model_cache/ 
