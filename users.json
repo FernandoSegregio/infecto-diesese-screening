@@ -1,0 +1,23 @@
+{
+  "admin": {
+    "password_hash": "4f0377a32ec271e862748598a474f759bfd499c287d535847f488186a852ea06",
+    "role": "administrador",
+    "name": "Administrador do Sistema",
+    "created_at": "2025-06-03T20:28:05.624950",
+    "active": true
+  },
+  "medico": {
+    "password_hash": "e1ab8d94228d89003002b7cce549fed884c935a0c99b5a8de88045e5ef7cacda",
+    "role": "medico",
+    "name": "M\u00e9dico Respons\u00e1vel",
+    "created_at": "2025-06-03T20:28:05.624974",
+    "active": true
+  },
+  "enfermeiro": {
+    "password_hash": "39176e1ea9cac2e58e3fabeb57ce047663fd6944c4c6d93d26f44bdc7d3e63fe",
+    "role": "enfermeiro",
+    "name": "Enfermeiro(a)",
+    "created_at": "2025-06-03T20:28:05.624981",
+    "active": true
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "ESP32_TEMP_001": {
+    "name": "Sensor Recep\u00e7\u00e3o Principal",
+    "type": "temperature_sensor",
+    "location": "Recep\u00e7\u00e3o - Posto 1",
+    "registered_at": "2024-06-03T21:30:00",
+    "last_seen": "2025-06-03T22:20:14.424463",
+    "status": "online",
+    "battery_level": 82,
+    "firmware_version": "1.0.0"
+  }
+}
