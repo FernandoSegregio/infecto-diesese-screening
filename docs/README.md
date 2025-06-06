@@ -113,6 +113,11 @@ streamlit run app.py
 
 ### ESP32 no Wokwi
 
+#### Acesse o link abaixo, ou use o passo a passo para fazer manualmente:
+
+https://wokwi.com/projects/432976719461101569
+
+
 1. **Acessar:** https://wokwi.com
 2. **Criar projeto** Arduino ESP32
 3. **Colar código** de `esp32_temperature_sensor.ino`
