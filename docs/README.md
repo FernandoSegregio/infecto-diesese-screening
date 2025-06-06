@@ -1,5 +1,38 @@
 # 🏥 Sistema de IA para Triagem Médica com IoT
 
+# FIAP - Faculdade de Informática e Administração Paulista
+
+<p align="center">
+    <a href="https://www.fiap.com.br/">
+        <img src="assets/logo-fiap.png" alt="FIAP - Faculdade de Informática e Admnistração Paulista" border="0" width=40% height=40%>
+    </a>
+</p>
+
+<br>
+
+# Nome do projeto
+
+```
+FarmTech Solutions - Sistema Completo de Automação Agrícola
+```
+
+## Nome do grupo
+
+```
+TriagemSem Fronteiras
+```
+
+## 👨‍🎓 Integrantes:
+
+- <a href="https://www.linkedin.com/in/fernando-segregio/">Fernando Segregio</a>    
+
+## 👩‍🏫 Professores:
+
+### Tutor(a) 
+- <a href="https://www.linkedin.com/in/leonardoorabona/">Leonardo Ruiz Orabona</a>
+### Coordenador(a)
+- <a href="https://www.linkedin.com/in/profandregodoi/">André Godoi</a>
+
 Sistema completo de triagem médica com inteligência artificial, integração IoT via MQTT e controle remoto de sensores ESP32.
 
 ## 🎯 Funcionalidades Principais
