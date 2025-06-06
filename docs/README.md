@@ -10,12 +10,6 @@
 
 <br>
 
-# Nome do projeto
-
-```
-FarmTech Solutions - Sistema Completo de Automação Agrícola
-```
-
 ## Nome do grupo
 
 ```
