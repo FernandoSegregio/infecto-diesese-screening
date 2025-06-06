@@ -13,7 +13,7 @@ ESP32 (Wokwi) → WiFi → API Flask → Sistema Streamlit → Dashboard IoT
 ### Componentes Principais:
 
 1. **ESP32 + Sensores** (Hardware Virtual no Wokwi)
-2. **API REST** (Flask - Porta 5001)
+2. **API REST** (Flask - Porta 5002)
 3. **Dashboard IoT** (Streamlit)
 4. **Integração Automática** (Triagem Médica)
 
@@ -101,7 +101,7 @@ GET /api/health
    - Preencha: ID, Nome, Tipo, Localização
 
 2. **Iniciar Servidor API:**
-   - O servidor inicia automaticamente na porta 5001
+   - O servidor inicia automaticamente na porta 5002
    - Verificar status no dashboard
 
 ### 3. Executar Simulação
@@ -219,7 +219,7 @@ projeto/
 
 #### 2. Dados não chegam ao sistema
 - **Verificar:** URL do servidor no código ESP32
-- **Solução:** Usar `http://localhost:5001/api/sensor-data`
+- **Solução:** Usar `http://localhost:5002/api/sensor-data`
 
 #### 3. Sensor não detecta temperatura
 - **Verificar:** Conexões do DS18B20
@@ -244,9 +244,9 @@ projeto/
 
 ### Conectividade:
 - 📶 MQTT para múltiplos dispositivos
-- ☁️ Cloud IoT (AWS/Azure)
+- ☁️ Cloud IoT
 - 📱 App mobile
-- 🔔 Notificações push
+- 📞 Notificações push
 
 ### Análise Avançada:
 - 🤖 ML para detecção de anomalias

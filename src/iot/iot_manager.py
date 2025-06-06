@@ -69,10 +69,21 @@ class IoTManager:
         with open(self.readings_file, 'w') as f:
             json.dump(readings, f, indent=2)
     
-    def receive_sensor_data(self, device_id, sensor_type, value, unit='°C', location=None, battery_level=None, firmware_version=None):
-        """Recebe dados de sensores"""
+    def receive_sensor_data(self, device_id, sensor_type, value, unit='°C', location=None, 
+                           battery_level=None, firmware_version=None, status=None):
+        """Recebe dados de um sensor IoT"""
         readings = self._load_readings()
         devices = self._load_devices()
+        
+        # Auto-registrar dispositivo se não existir
+        if device_id not in devices:
+            self.register_device(
+                device_id=device_id,
+                device_name=f"Sensor {device_id}",
+                device_type=sensor_type,
+                location=location or "Local não especificado"
+            )
+            devices = self._load_devices()
         
         # Atualizar status do dispositivo
         if device_id in devices:
@@ -82,6 +93,8 @@ class IoTManager:
                 devices[device_id]['battery_level'] = battery_level
             if firmware_version is not None:
                 devices[device_id]['firmware_version'] = firmware_version
+            if location is not None:
+                devices[device_id]['location'] = location
             self._save_devices(devices)
         
         # Salvar leitura
@@ -92,6 +105,8 @@ class IoTManager:
             'unit': unit,
             'location': location,
             'battery_level': battery_level,
+            'firmware_version': firmware_version,
+            'status': status,
             'timestamp': datetime.now().isoformat(),
             'processed': False
         }
@@ -209,7 +224,7 @@ class IoTManager:
         else:
             return "🟢 Normal"
     
-    def start_api_server(self, port=5001):
+    def start_api_server(self, port=5002):
         """Inicia servidor Flask para receber dados IoT"""
         if self.flask_app is None:
             self.flask_app = Flask(__name__)
@@ -218,11 +233,12 @@ class IoTManager:
             def home():
                 return jsonify({
                     'message': 'Sistema IoT - API de Sensores',
-                    'version': '1.0.0',
+                    'version': '2.0.0',
                     'status': 'online',
                     'timestamp': datetime.now().isoformat(),
                     'endpoints': {
                         'POST /api/sensor-data': 'Receber dados de sensores',
+                        'POST /webhook': 'Endpoint para webhooks ESP32',
                         'GET /api/device-status/<device_id>': 'Status do dispositivo',
                         'GET /api/health': 'Health check da API'
                     },
@@ -241,13 +257,14 @@ class IoTManager:
                     location = data.get('location')
                     battery_level = data.get('battery_level')
                     firmware_version = data.get('firmware_version')
+                    status = data.get('status')
                     
                     if not all([device_id, sensor_type, value is not None]):
                         return jsonify({'error': 'Missing required fields'}), 400
                     
                     reading = self.receive_sensor_data(
                         device_id, sensor_type, value, unit, 
-                        location, battery_level, firmware_version
+                        location, battery_level, firmware_version, status
                     )
                     
                     return jsonify({
@@ -259,6 +276,78 @@ class IoTManager:
                 
                 except Exception as e:
                     return jsonify({'error': str(e)}), 500
+            
+            # Novo endpoint específico para webhook do ESP32
+            @self.flask_app.route('/webhook', methods=['POST'])
+            @self.flask_app.route('/', methods=['POST'])  # Para compatibilidade com webhook.site
+            def webhook_esp32():
+                try:
+                    data = request.json
+                    print(f"📨 Dados recebidos do webhook: {data}")
+                    
+                    # Extrair dados do payload ESP32
+                    device_id = data.get('device_id')
+                    sensor_type = data.get('sensor_type', 'temperature')
+                    value = data.get('value')
+                    unit = data.get('unit', '°C')
+                    location = data.get('location')
+                    battery_level = data.get('battery_level')
+                    firmware_version = data.get('firmware_version')
+                    status = data.get('status')
+                    
+                    # Validar dados obrigatórios
+                    if not device_id or value is None:
+                        print("❌ Dados obrigatórios faltando")
+                        return jsonify({'error': 'device_id e value são obrigatórios'}), 400
+                    
+                    # Verificar se é registro de dispositivo
+                    if data.get('action') == 'register':
+                        print(f"📝 Registrando dispositivo: {device_id}")
+                        success = self.register_device(
+                            device_id=device_id,
+                            device_name=f"ESP32 {device_id}",
+                            device_type=sensor_type,
+                            location=location or "ESP32 Sensor"
+                        )
+                        return jsonify({
+                            'status': 'success',
+                            'message': 'Device registered successfully',
+                            'device_id': device_id
+                        })
+                    
+                    # Processar leitura do sensor
+                    print(f"🌡️ Processando leitura: {value}{unit} de {device_id}")
+                    reading = self.receive_sensor_data(
+                        device_id=device_id,
+                        sensor_type=sensor_type,
+                        value=value,
+                        unit=unit,
+                        location=location,
+                        battery_level=battery_level,
+                        firmware_version=firmware_version,
+                        status=status
+                    )
+                    
+                    # Log do status da temperatura
+                    if sensor_type == 'temperature':
+                        temp_status = self._get_temp_status(float(value))
+                        print(f"📊 Status: {temp_status}")
+                    
+                    return jsonify({
+                        'status': 'success',
+                        'message': 'Data received and processed successfully',
+                        'device_id': device_id,
+                        'reading_id': len(self._load_readings()),
+                        'timestamp': reading['timestamp'],
+                        'temperature_status': self._get_temp_status(float(value)) if sensor_type == 'temperature' else 'N/A'
+                    })
+                
+                except Exception as e:
+                    print(f"❌ Erro no webhook: {str(e)}")
+                    return jsonify({
+                        'error': 'Internal server error',
+                        'message': str(e)
+                    }), 500
             
             @self.flask_app.route('/api/device-status/<device_id>', methods=['GET'])
             def get_status(device_id):
@@ -275,6 +364,15 @@ class IoTManager:
                     'devices_count': len(self.get_all_devices()),
                     'readings_count': len(self._load_readings())
                 })
+            
+            # Endpoint para testar conectividade
+            @self.flask_app.route('/api/test', methods=['POST'])
+            def test_endpoint():
+                return jsonify({
+                    'status': 'success',
+                    'message': 'Test endpoint working',
+                    'timestamp': datetime.now().isoformat()
+                })
         
         # Executar Flask em thread separada
         if self.flask_thread is None or not self.flask_thread.is_alive():
@@ -283,5 +381,7 @@ class IoTManager:
             )
             self.flask_thread.daemon = True
             self.flask_thread.start()
+            print(f"🚀 Servidor IoT API iniciado na porta {port}")
+            print(f"📡 Webhook ESP32 disponível em: http://localhost:{port}/webhook")
             return True
         return False 

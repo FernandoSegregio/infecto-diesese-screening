@@ -3,17 +3,22 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
+from .iot_manager import IoTManager
 import json
-from iot_manager import IoTManager
 
 class IoTDashboard:
-    def __init__(self):
+    def __init__(self, mqtt_manager=None):
         self.iot_manager = IoTManager()
+        self.mqtt_manager = mqtt_manager
     
     def show_dashboard(self):
         """Exibe dashboard IoT completo"""
         try:
             st.title("🌡️ Dashboard IoT - Sensores de Temperatura")
+            
+            # Status MQTT no topo
+            if self.mqtt_manager:
+                self._show_mqtt_status()
             
             # Verificar se o IoT Manager está funcionando
             try:
@@ -51,11 +56,13 @@ class IoTDashboard:
             # Mostrar alertas se houver
             self._show_alerts()
             
-            # Tabs do dashboard
-            tab1, tab2, tab3, tab4 = st.tabs([
-                "📊 Monitoramento", 
+            # Tabs para diferentes funcionalidades
+            tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+                "📡 Monitoramento", 
+                "🎮 Controle Remoto MQTT",
                 "🔧 Dispositivos", 
                 "📈 Histórico", 
+                "🚨 Alertas", 
                 "⚙️ Configurações"
             ])
             
@@ -63,12 +70,18 @@ class IoTDashboard:
                 self._show_monitoring()
             
             with tab2:
+                self._show_mqtt_remote_control()
+                
+            with tab3:
                 self._show_devices()
             
-            with tab3:
+            with tab4:
                 self._show_history()
             
-            with tab4:
+            with tab5:
+                self._show_alerts()
+            
+            with tab6:
                 self._show_settings()
                 
         except Exception as e:
@@ -634,4 +647,167 @@ curl -X POST http://127.0.0.1:5001/api/sensor-data \\
     
     def get_latest_temperature_for_triagem(self):
         """Obtém última temperatura para integração com triagem"""
-        return self.iot_manager.get_latest_temperature_for_triagem() 
+        return self.iot_manager.get_latest_temperature_for_triagem()
+
+    def _show_mqtt_status(self):
+        """Mostra status da conexão MQTT"""
+        if not self.mqtt_manager:
+            st.warning("⚠️ MQTT Manager não disponível")
+            return
+        
+        status = self.mqtt_manager.get_connection_status()
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            if status['connected']:
+                st.success("🟢 MQTT Conectado")
+            else:
+                st.error("🔴 MQTT Desconectado")
+        
+        with col2:
+            st.info(f"🌐 Broker: {status['broker']}")
+        
+        with col3:
+            docker_status = "🐳 Docker" if status['docker'] else "💻 Local"
+            st.info(f"🏠 {docker_status}")
+        
+        with col4:
+            st.info(f"👤 {status['username']}")
+
+    def _show_mqtt_remote_control(self):
+        """Controle remoto dos dispositivos ESP32 via MQTT"""
+        st.subheader("🎮 Controle Remoto MQTT")
+        
+        if not self.mqtt_manager:
+            st.error("❌ MQTT Manager não disponível")
+            st.info("💡 Certifique-se de que o sistema MQTT foi inicializado corretamente")
+            return
+        
+        if not self.mqtt_manager.connected:
+            st.error("❌ MQTT não conectado ao broker")
+            st.info("🔄 Aguarde a conexão ou reinicie o sistema")
+            return
+        
+        # Selecionar dispositivo alvo
+        devices = self.iot_manager.get_all_devices()
+        
+        if devices:
+            device_options = list(devices.keys())
+            selected_device = st.selectbox(
+                "📱 Selecionar Dispositivo:",
+                device_options,
+                help="Escolha o dispositivo ESP32 para controlar remotamente"
+            )
+        else:
+            st.warning("⚠️ Nenhum dispositivo registrado")
+            selected_device = "ESP32_TERMOMETRO_001"
+            st.info(f"💡 Usando dispositivo padrão: {selected_device}")
+        
+        st.divider()
+        
+        # Botões de controle
+        st.subheader("🎯 Comandos Disponíveis")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown("### 🌡️ Medição de Temperatura")
+            if st.button("📏 Medir Temperatura Agora", 
+                        use_container_width=True,
+                        help="Solicita uma leitura imediata de temperatura"):
+                
+                with st.spinner("🔄 Enviando comando via MQTT..."):
+                    success = self.mqtt_manager.request_temperature_reading(selected_device)
+                    if success:
+                        st.success("✅ Comando de medição enviado!")
+                        st.info("🕐 Aguarde alguns segundos para a leitura aparecer no monitoramento")
+                        st.balloons()
+                    else:
+                        st.error("❌ Falha ao enviar comando")
+        
+        with col2:
+            st.markdown("### 📊 Status do Dispositivo")
+            if st.button("📋 Solicitar Status", 
+                        use_container_width=True,
+                        help="Solicita status completo do dispositivo"):
+                
+                with st.spinner("🔄 Solicitando status via MQTT..."):
+                    success = self.mqtt_manager.request_device_status(selected_device)
+                    if success:
+                        st.success("✅ Solicitação de status enviada!")
+                        st.info("📡 Aguarde a resposta no monitoramento")
+                    else:
+                        st.error("❌ Falha ao solicitar status")
+        
+        with col3:
+            st.markdown("### 🔧 Teste de Hardware")
+            if st.button("💡 Testar LEDs/Buzzer", 
+                        use_container_width=True,
+                        help="Testa LEDs e buzzer do dispositivo"):
+                
+                with st.spinner("🔄 Enviando teste de hardware..."):
+                    success = self.mqtt_manager.test_device_hardware(selected_device)
+                    if success:
+                        st.success("✅ Teste de hardware enviado!")
+                        st.info("🎯 O dispositivo deve piscar os LEDs e tocar o buzzer")
+                    else:
+                        st.error("❌ Falha ao enviar teste")
+        
+        st.divider()
+        
+        # Área de comando customizado
+        st.subheader("⚙️ Comando Personalizado")
+        
+        with st.expander("🛠️ Enviar Comando Customizado", expanded=False):
+            col_cmd1, col_cmd2 = st.columns([2, 1])
+            
+            with col_cmd1:
+                custom_command = st.text_input(
+                    "Comando:",
+                    placeholder="Ex: measure_temperature, get_status, test_leds",
+                    help="Digite um comando personalizado para enviar ao ESP32"
+                )
+            
+            with col_cmd2:
+                if st.button("📤 Enviar Comando"):
+                    if custom_command:
+                        success = self.mqtt_manager.publish_command(
+                            command=custom_command, 
+                            target_device=selected_device
+                        )
+                        if success:
+                            st.success(f"✅ Comando '{custom_command}' enviado!")
+                        else:
+                            st.error("❌ Falha ao enviar comando")
+                    else:
+                        st.warning("⚠️ Digite um comando válido")
+        
+        # Status da conexão MQTT
+        st.subheader("📡 Status da Conexão MQTT")
+        
+        mqtt_status = self.mqtt_manager.get_connection_status()
+        
+        col_status1, col_status2 = st.columns(2)
+        
+        with col_status1:
+            st.info(f"**Broker:** {mqtt_status['broker']}")
+            st.info(f"**Client ID:** {mqtt_status['client_id']}")
+            st.info(f"**Usuário:** {mqtt_status['username']}")
+        
+        with col_status2:
+            st.info(f"**Status:** {'🟢 Conectado' if mqtt_status['connected'] else '🔴 Desconectado'}")
+            st.info(f"**Ambiente:** {'🐳 Docker' if mqtt_status['docker'] else '💻 Local'}")
+            st.info(f"**Tópico Comandos:** `{mqtt_status['command_topic']}`")
+        
+        # Histórico de comandos (simulado)
+        st.subheader("📜 Últimos Comandos Enviados")
+        
+        if 'mqtt_command_history' not in st.session_state:
+            st.session_state['mqtt_command_history'] = []
+        
+        if st.session_state['mqtt_command_history']:
+            for idx, cmd in enumerate(reversed(st.session_state['mqtt_command_history'][-5:])):
+                st.text(f"🕐 {cmd}")
+        else:
+            st.info("📭 Nenhum comando enviado ainda") 

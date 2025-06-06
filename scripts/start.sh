@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Script de inicialização para AWS App Runner
+# Script de inicialização local
 # Sistema de Triagem Médica IoT
 
 set -e  # Parar em caso de erro
 
 echo "🏥 =========================================="
 echo "🏥 Sistema de Triagem Médica IoT"
-echo "🏥 Iniciando na AWS App Runner..."
+echo "🏥 Iniciando localmente..."
 echo "🏥 =========================================="
 echo "📅 $(date)"
 echo "🌍 Timezone: $(date +%Z)"
@@ -52,9 +52,9 @@ fi
 if [ ! -f "iot_devices.json" ]; then
     echo '{
   "ESP32_DEMO_001": {
-    "name": "Sensor Demo AWS",
+    "name": "Sensor Demo Local",
     "type": "temperature_sensor",
-    "location": "AWS App Runner Demo",
+    "location": "Ambiente Local",
     "registered_at": "'$(date -Iseconds)'",
     "last_seen": null,
     "status": "offline",
@@ -126,10 +126,10 @@ check_port() {
 }
 
 # Iniciar API IoT em background
-echo "📡 Iniciando API IoT na porta 5001..."
+echo "📡 Iniciando API IoT na porta 5002..."
 
-if check_port 5001; then
-    echo "⚠️ Porta 5001 já está em uso, tentando matar processo..."
+if check_port 5002; then
+    echo "⚠️ Porta 5002 já está em uso, tentando matar processo..."
     pkill -f "start_iot_api.py" || true
     sleep 2
 fi
@@ -148,7 +148,7 @@ echo "🔍 Verificando API IoT..."
 api_ready=false
 
 for i in {1..10}; do
-    if curl -f -s http://localhost:5001/api/health > /dev/null 2>&1; then
+    if curl -f -s http://localhost:5002/api/health > /dev/null 2>&1; then
         echo "✅ API IoT respondendo na tentativa $i!"
         api_ready=true
         break
@@ -160,7 +160,7 @@ done
 
 if [ "$api_ready" = true ]; then
     echo "🎉 API IoT iniciada com sucesso!"
-    curl -s http://localhost:5001/api/health | head -1
+    curl -s http://localhost:5002/api/health | head -1
 else
     echo "⚠️ API IoT não respondeu, mas continuando com Streamlit..."
 fi

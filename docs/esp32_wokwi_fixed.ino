@@ -11,8 +11,8 @@
 const char* ssid = "Wokwi-GUEST";
 const char* password = "";
 
-// Configurações do servidor
-const char* serverURL = "http://localhost:5001/api/sensor-data";
+// Configurações do servidor (porta 5002 para compatibilidade com macOS)
+const char* serverURL = "http://localhost:5002/api/sensor-data";
 
 // Configurações do sensor DS18B20
 #define ONE_WIRE_BUS 4
@@ -372,13 +372,23 @@ void playAlert(int beeps) {
   }
 }
 
+// FUNÇÃO CORRIGIDA PARA WOKWI
 void playTone(int frequency, int duration) {
-  // Gerar tom usando PWM
-  ledcSetup(0, frequency, 8);
-  ledcAttachPin(BUZZER_PIN, 0);
-  ledcWrite(0, 128); // 50% duty cycle
-  delay(duration);
-  ledcWrite(0, 0); // Parar som
+  // Versão atualizada para ESP32 mais recente no Wokwi
+  #if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3,0,0)
+    // Para versões mais novas do ESP32
+    ledcAttach(BUZZER_PIN, frequency, 8);
+    ledcWrite(BUZZER_PIN, 128); // 50% duty cycle
+    delay(duration);
+    ledcWrite(BUZZER_PIN, 0); // Parar som
+  #else
+    // Para versões mais antigas do ESP32
+    ledcSetup(0, frequency, 8);
+    ledcAttachPin(BUZZER_PIN, 0);
+    ledcWrite(0, 128); // 50% duty cycle
+    delay(duration);
+    ledcWrite(0, 0); // Parar som
+  #endif
 }
 
 // Função para debug - mostra informações do sistema
