@@ -431,3 +431,9 @@ Em caso de problemas:
 - ✅ **Monitoramento completo** de dispositivos
 
 **🎯 Próximo passo:** Execute `bash start-docker.sh` e acesse http://localhost:8501! 
+
+## 📹 Apresentação
+
+[![Vídeo](https://img.youtube.com/vi/HBGZ-YfFa3w/hqdefault.jpg)](https://youtu.be/HBGZ-YfFa3w)
+
+📹 **Link:** https://youtu.be/HBGZ-YfFa3w
