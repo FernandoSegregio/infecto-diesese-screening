@@ -19,7 +19,7 @@ FarmTech Solutions - Sistema Completo de Automação Agrícola
 ## Nome do grupo
 
 ```
-TriagemSem Fronteiras
+Triagem Sem Fronteiras
 ```
 
 ## 👨‍🎓 Integrantes:
